@@ -1,0 +1,36 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title></title>
+</head>
+<body>
+    <a href="DepartingFlights">Departing Flights</a> <br />
+    <a href="LandingFlights">Landing Flights</a> <br />
+    <hr/>
+    <form method="post" action="http://localhost:9002/page/SearchFlightsResults">
+
+        <select name="SearchBy">
+            <option value="None">Search by</option>
+            <option value="AC.AIRLINE_NAME">Airline Name</option>
+            <option value="C1.COUNTRY_NAME">Origin Country</option>
+            <option value="C2.COUNTRY_NAME">Destination Country</option>
+            <option value="F.ID">Flight Number</option>
+        </select>
+        <input name="SearchText" type="text" placeholder="Your search here" /> <br />
+
+        <select name="SearchFlights">
+            <option value="Both">Departing and landing flights</option>
+            <option value="Departing">Departing flights</option>
+            <option value="Landing">Landing flights</option>
+        </select> <br />
+
+        <button type="submit">Search</button>
+    </form>
+</body>
+</html>

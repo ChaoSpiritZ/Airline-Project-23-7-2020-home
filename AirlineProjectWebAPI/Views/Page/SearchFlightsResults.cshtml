@@ -1,0 +1,38 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title></title>
+</head>
+<body>
+    <a href="DepartingFlights">Departing Flights</a> <br />
+    <a href="LandingFlights">Landing Flights</a> <br />
+    <a href="SearchFlights">Back to Search</a> <br />
+    <div>
+        <table border="1">
+            <tr>
+                <th>Flight (Airline + Id)</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Departing At</th>
+                <th>Landing At</th>
+            </tr>
+            @foreach (var flight in ViewBag.Flights)
+            {
+                <tr>
+                    <td>@flight.AirlineCompanyName @flight.ID</td>
+                    <td>@flight.OriginCountryName</td>
+                    <td>@flight.DestinationCountryName</td>
+                    <td>@flight.DepartureTime</td>
+                    <td>@flight.LandingTime</td>
+                </tr>
+            }
+        </table>
+    </div>
+</body>
+</html>

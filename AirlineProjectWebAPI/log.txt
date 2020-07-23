@@ -1,0 +1,32 @@
+2020-07-10 15:26:00,002 [42] DEBUG AirlineProject.FacadeBase - creating airlineDAO from type AirlineDAOMSSQL, testMode = False
+2020-07-10 15:26:00,015 [42] DEBUG AirlineProject.AirlineDAOMSSQL - setting connection string depending on test mode
+2020-07-10 15:26:00,016 [42] DEBUG AirlineProject.AirlineDAOMSSQL - connection string = Data Source=DESKTOP-JJ6DFK2;Initial Catalog=AirlineProject;Integrated Security=True
+2020-07-10 15:26:00,016 [42] DEBUG AirlineProject.FacadeBase - AirlineDAOMSSQL created successfully
+2020-07-10 15:26:00,182 [46] INFO  AirlineProjectWebAPI.Controllers.AnonymousAuthenticationAttribute - entering OnAuthorization
+2020-07-10 15:26:00,182 [46] DEBUG AirlineProjectWebAPI.Controllers.AnonymousAuthenticationAttribute - setting testMode to false
+2020-07-10 15:26:00,182 [46] DEBUG AirlineProjectWebAPI.Controllers.AnonymousAuthenticationAttribute - checking if authorization is not null (if it's null then there will be NO statement after this confirming it)
+2020-07-10 15:26:00,183 [46] DEBUG AirlineProjectWebAPI.Controllers.AnonymousAuthenticationAttribute - authorization is not null, getting and decoding parameters to username and password
+2020-07-10 15:26:00,183 [46] DEBUG AirlineProjectWebAPI.Controllers.AnonymousAuthenticationAttribute - checking if test mode should be activated
+2020-07-10 15:26:00,183 [46] DEBUG AirlineProjectWebAPI.Controllers.AnonymousAuthenticationAttribute - activating test mode
+2020-07-10 15:26:00,183 [46] DEBUG AirlineProjectWebAPI.Controllers.AnonymousAuthenticationAttribute - creating AnonymousUserFacade with testMode = True and putting into request properties
+2020-07-10 15:26:00,183 [46] DEBUG AirlineProject.FacadeBase - creating airlineDAO from type AirlineDAOMSSQL, testMode = True
+2020-07-10 15:26:00,183 [46] DEBUG AirlineProject.AirlineDAOMSSQL - setting connection string depending on test mode
+2020-07-10 15:26:00,183 [46] DEBUG AirlineProject.AirlineDAOMSSQL - connection string = Data Source=DESKTOP-JJ6DFK2;Initial Catalog=TESTINGAirlineProject;Integrated Security=True
+2020-07-10 15:26:00,183 [46] DEBUG AirlineProject.FacadeBase - AirlineDAOMSSQL created successfully
+2020-07-10 15:26:00,183 [46] INFO  AirlineProjectWebAPI.Controllers.AnonymousAuthenticationAttribute - exiting OnAuthorization
+2020-07-10 15:26:00,577 [46] DEBUG AirlineProject.FacadeBase - creating airlineDAO from type AirlineDAOMSSQL, testMode = True
+2020-07-10 15:26:00,577 [46] DEBUG AirlineProject.AirlineDAOMSSQL - setting connection string depending on test mode
+2020-07-10 15:26:00,577 [46] DEBUG AirlineProject.AirlineDAOMSSQL - connection string = Data Source=DESKTOP-JJ6DFK2;Initial Catalog=TESTINGAirlineProject;Integrated Security=True
+2020-07-10 15:26:00,577 [46] DEBUG AirlineProject.FacadeBase - AirlineDAOMSSQL created successfully
+2020-07-10 15:26:00,693 [46] DEBUG AirlineProject.AirlineDAOMSSQL - setting connection string depending on test mode
+2020-07-10 15:26:00,693 [46] DEBUG AirlineProject.AirlineDAOMSSQL - connection string = Data Source=DESKTOP-JJ6DFK2;Initial Catalog=TESTINGAirlineProject;Integrated Security=True
+2020-07-10 15:26:00,694 [46] DEBUG AirlineProject.FacadeBase - creating airlineDAO from type AirlineDAOMSSQL, testMode = True
+2020-07-10 15:26:00,694 [46] DEBUG AirlineProject.AirlineDAOMSSQL - setting connection string depending on test mode
+2020-07-10 15:26:00,694 [46] DEBUG AirlineProject.AirlineDAOMSSQL - connection string = Data Source=DESKTOP-JJ6DFK2;Initial Catalog=TESTINGAirlineProject;Integrated Security=True
+2020-07-10 15:26:00,694 [46] DEBUG AirlineProject.FacadeBase - AirlineDAOMSSQL created successfully
+2020-07-10 15:26:00,722 [33] DEBUG AirlineProject.AirlineDAOMSSQL - setting connection string depending on test mode
+2020-07-10 15:26:00,722 [33] DEBUG AirlineProject.AirlineDAOMSSQL - connection string = Data Source=DESKTOP-JJ6DFK2;Initial Catalog=AirlineProject;Integrated Security=True
+2020-07-10 15:26:00,736 [33] DEBUG AirlineProject.FacadeBase - creating airlineDAO from type AirlineDAOMSSQL, testMode = True
+2020-07-10 15:26:00,736 [33] DEBUG AirlineProject.AirlineDAOMSSQL - setting connection string depending on test mode
+2020-07-10 15:26:00,737 [33] DEBUG AirlineProject.AirlineDAOMSSQL - connection string = Data Source=DESKTOP-JJ6DFK2;Initial Catalog=TESTINGAirlineProject;Integrated Security=True
+2020-07-10 15:26:00,737 [33] DEBUG AirlineProject.FacadeBase - AirlineDAOMSSQL created successfully

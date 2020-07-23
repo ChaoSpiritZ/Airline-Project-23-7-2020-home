@@ -1,0 +1,57 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title></title>
+</head>
+<body>
+    <a href="DepartingFlights">Departing Flights</a> <br/>
+    <a href="SearchFlights">Search Flights</a> <br />
+    <div>
+        <table border="1">
+            <tr>
+                <th>Flight (airline + id)</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Landing At</th>
+                <th>Status</th>
+            </tr>
+            @foreach (var flight in ViewBag.Flights)
+            {
+            <tr>
+                <td>@flight.AirlineCompanyName @flight.ID</td>
+                <td>@flight.OriginCountryName</td>
+                <td>@flight.DestinationCountryName</td>
+                <td>@flight.LandingTime</td>
+                @{
+                    DateTime now = DateTime.Now;
+                    DateTime fifteenMinutesAgo = now.AddMinutes(-15);
+                    DateTime twoHoursAgo = now.AddHours(-2);
+                }
+                @if (flight.LandingTime < now)
+                {
+                    <td>Landed</td>
+                }
+                else if (flight.LandingTime < fifteenMinutesAgo)
+                {
+                    <td>Landing</td>
+                }
+                else if (flight.LandingTime < twoHoursAgo)
+                {
+                    <td>Final</td>
+                }
+                else
+                {
+                    <td>Flying</td>
+                }
+            </tr>
+            }
+        </table>
+    </div>
+</body>
+</html>
