@@ -118,6 +118,13 @@ namespace AirlineProject
             //return fullFlightsData;
         }
 
+        /// <summary>
+        /// search flights for razor page
+        /// </summary>
+        /// <param name="searchBy"></param>
+        /// <param name="searchText"></param>
+        /// <param name="searchFlights"></param>
+        /// <returns></returns>
         public IList<FullFlightData> SearchFlights(string searchBy, string searchText, string searchFlights)
         {
             IList<FullFlightData> fullFlightsData;
@@ -149,6 +156,97 @@ namespace AirlineProject
             }
             fullFlightsData = _flightDAO.SearchFlightsFullData(sqlQuery);
             return fullFlightsData;
+        }
+
+        /// <summary>
+        /// search flights for html/js page
+        /// </summary>
+        /// <param name="searchBy"></param>
+        /// <param name="searchText"></param>
+        /// <param name="searchFlights"></param>
+        /// <returns></returns>
+        public IList<FullFlightData> SearchFlights2(string origin, string destination, string orderBy)
+        {
+            IList<FullFlightData> fullFlightsData;
+            string sqlQuery = "Select F.ID, AC.AIRLINE_NAME, C1.COUNTRY_NAME as ORIGIN_COUNTRY, C2.COUNTRY_NAME as DESTINATION_COUNTRY, F.DEPARTURE_TIME, F.LANDING_TIME, F.REMAINING_TICKETS from Flights as F " +
+                "inner join AirlineCompanies as AC on AC.ID = F.AIRLINECOMPANY_ID " +
+                "inner join Countries as C1 on C1.ID = F.ORIGIN_COUNTRY_CODE " +
+                "inner join Countries as C2 on C2.ID = F.DESTINATION_COUNTRY_CODE ";
+            if (origin != "none" || destination != "none")
+            {
+                sqlQuery += "where ";
+                if(origin != "none")
+                {
+                    sqlQuery += $"C1.COUNTRY_NAME = '{origin} '";
+                }
+                if(origin != "none" && destination != "none")
+                {
+                    sqlQuery += "and ";
+                }
+                if(destination != "none")
+                {
+                    sqlQuery += $"C2.COUNTRY_NAME = '{destination} '";
+                }
+            }
+            sqlQuery += $"order by {orderBy}";
+            
+            fullFlightsData = _flightDAO.SearchFlightsFullData(sqlQuery);
+            return fullFlightsData;
+        }
+
+        public IList<Country> GetAllCountries()
+        {
+            IList<Country> countries = _countryDAO.GetAll();
+            return countries;
+        }
+
+        /// <summary>
+        /// temporary, supposed to be in admin facade with auth
+        /// </summary>
+        /// <returns></returns>
+        public IList<Customer> GetAllCustomers()
+        {
+            IList<Customer> customers = _customerDAO.GetAll();
+            return customers;
+        }
+
+        /// <summary>
+        /// temporary, supposed to be in admin facade with auth (actually exists there already)
+        /// </summary>
+        /// <param name="customer"></param>
+        public void RemoveCustomer(Customer customer)
+        {
+            POCOValidator.CustomerValidator(customer, true);
+            if (_customerDAO.Get(customer.ID) == null)
+                throw new UserNotFoundException($"failed to remove customer! customer with username [{customer.UserName}] was not found!");
+            IList<Flight> flights = _flightDAO.GetFlightsByCustomer(customer);
+            flights.ToList().ForEach(f => f.RemainingTickets++);
+            flights.ToList().ForEach(f => _flightDAO.Update(f));
+            _ticketDAO.RemoveTicketsByCustomer(customer);
+            _customerDAO.Remove(customer);
+        }
+
+        /// <summary>
+        /// temporary, supposed to be in admin facade
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public Customer GetCustomerById(long id)
+        {
+            Customer customer = _customerDAO.Get(id);
+            return customer;
+        }
+
+        /// <summary>
+        /// temporary, supposed to be in admin facade
+        /// </summary>
+        /// <param name="customer">updates the customer with this parameter's ID</param>
+        public void UpdateCustomerDetails(Customer customer)
+        {
+            POCOValidator.CustomerValidator(customer, true);
+            if (_customerDAO.Get(customer.ID) == null)
+                throw new UserNotFoundException($"failed to update customer! customer with username [{customer.UserName}] was not found!");
+            _customerDAO.Update(customer);
         }
     }
 }

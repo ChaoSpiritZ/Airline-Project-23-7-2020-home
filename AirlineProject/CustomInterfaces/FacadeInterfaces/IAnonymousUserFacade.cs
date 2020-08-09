@@ -20,5 +20,8 @@ namespace AirlineProject
         IList<FullFlightData> GetDepartingFlightsFullData();
         IList<FullFlightData> GetLandingFlightsFullData();
         IList<FullFlightData> SearchFlights(string searchBy, string searchText, string searchFlights);
+        IList<FullFlightData> SearchFlights2(string origin, string destination, string orderBy);
+        IList<Country> GetAllCountries();
+        //IList<Customer> GetAllCustomers(); temporary
     }
 }

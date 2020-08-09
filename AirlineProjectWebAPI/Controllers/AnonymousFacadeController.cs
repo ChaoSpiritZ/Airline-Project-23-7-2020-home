@@ -4,11 +4,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.Http.Cors;
 using AirlineProject;
 
 namespace AirlineProjectWebAPI.Controllers
 {
     [AnonymousAuthentication]
+    [EnableCors("*", "*", "*")]
     public class AnonymousFacadeController : ApiController
     {
         private readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -28,6 +30,34 @@ namespace AirlineProjectWebAPI.Controllers
             IList<AirlineCompany> result = ((AnonymousUserFacade)Request.Properties["facade"]).GetAllAirlineCompanies();
 
             if(result.Count == 0)
+            {
+                return StatusCode(HttpStatusCode.NoContent);
+            }
+
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("api/anonymousfacade/getallcountries")]
+        public IHttpActionResult GetAllCountries()
+        {
+            IList<Country> result = ((AnonymousUserFacade)Request.Properties["facade"]).GetAllCountries();
+
+            if (result.Count == 0)
+            {
+                return StatusCode(HttpStatusCode.NoContent);
+            }
+
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("api/anonymousfacade/getallcustomers")]
+        public IHttpActionResult GetAllCustomers()
+        {
+            IList<Customer> result = ((AnonymousUserFacade)Request.Properties["facade"]).GetAllCustomers();
+
+            if (result.Count == 0)
             {
                 return StatusCode(HttpStatusCode.NoContent);
             }
@@ -164,6 +194,38 @@ namespace AirlineProjectWebAPI.Controllers
             }
 
             return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("api/anonymousfacade/searchflights")]
+        public IHttpActionResult SearchFlights(string origin, string destination, string sorting)
+        {
+            IList<FullFlightData> result = ((AnonymousUserFacade)Request.Properties["facade"]).SearchFlights2(origin, destination, sorting);
+            if (result.Count == 0)
+            {
+                return StatusCode(HttpStatusCode.NoContent);
+            }
+
+            return Ok(result);
+        }
+
+        [HttpPut]
+        [Route("api/anonymousfacade/updatecustomer")]
+        public IHttpActionResult UpdateCustomer([FromBody] Customer customer)
+        {
+            ((AnonymousUserFacade)Request.Properties["facade"]).UpdateCustomerDetails(customer);
+            return Ok();
+        }
+
+        [HttpDelete]
+        [Route("api/anonymousfacade/deletecustomer/{customerId}")]
+        public IHttpActionResult DeleteCustomer(long customerId)
+        {
+            //get customer by id, then delete the customer
+            Customer result = ((AnonymousUserFacade)Request.Properties["facade"]).GetCustomerById(customerId);
+            ((AnonymousUserFacade)Request.Properties["facade"]).RemoveCustomer(result);
+
+            return Ok();
         }
     }
 }
