@@ -224,7 +224,7 @@ namespace AirlineProjectWebAPI.Controllers
             //get customer by id, then delete the customer
             Customer result = ((AnonymousUserFacade)Request.Properties["facade"]).GetCustomerById(customerId);
             ((AnonymousUserFacade)Request.Properties["facade"]).RemoveCustomer(result);
-
+             
             return Ok();
         }
     }
