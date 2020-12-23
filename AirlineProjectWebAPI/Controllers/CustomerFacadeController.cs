@@ -1,14 +1,17 @@
 ﻿using AirlineProject;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace AirlineProjectWebAPI.Controllers
 {
     [CustomerAuthentication]
+    [EnableCors("*", "*", "*")]
     public class CustomerFacadeController : ApiController //inheriting from AnonymousFacadeController does problems
     {
         private FlyingCenterSystem fcs = FlyingCenterSystem.GetInstance();
@@ -37,10 +40,10 @@ namespace AirlineProjectWebAPI.Controllers
             //return token;
         }
 
-        //public ILoginToken GetLoginToken()
+        //public ILoginToken GetLoginToken(out ILoggedInCustomerFacade customerFacade)
         //{
-        //    ILoginToken token;
-        //    customerFacade = (ILoggedInCustomerFacade)fcs.Login("YoLevi", "123", out token);
+        //    customerFacade = (ILoggedInCustomerFacade)Request.Properties["facade"];
+        //    ILoginToken token = (LoginToken<Customer>)Request.Properties["token"];
         //    return token;
         //}
 
@@ -62,6 +65,28 @@ namespace AirlineProjectWebAPI.Controllers
             //return Ok(result);
         }
 
+        [HttpGet]
+        [Route("api/customerfacade/getallmytickets")]
+        public IHttpActionResult GetAllMyTickets()
+        {
+            ILoggedInCustomerFacade customerFacade;
+            LoginToken<Customer> token;
+            if (TryGetConnector(out customerFacade, out token) == true)
+            {
+                try
+                {
+                    IList<Ticket> result = customerFacade.GetAllMyTickets(token);
+                    return Ok(result);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    return BadRequest(e.Message);
+                }
+            }
+            return Unauthorized();
+        }
+
         [HttpPost]
         [Route("api/customerfacade/purchaseticket")]
         public IHttpActionResult PurchaseTicket([FromBody] Flight flight)
@@ -70,8 +95,16 @@ namespace AirlineProjectWebAPI.Controllers
             LoginToken<Customer> token;
             if (TryGetConnector(out customerFacade, out token) == true)
             {
-                Ticket result = customerFacade.PurchaseTicket(token, flight);
-                return Ok(result);
+                try
+                {
+                    Ticket result = customerFacade.PurchaseTicket(token, flight);
+                    return Ok(result);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    return BadRequest(e.Message);
+                }
             }
             return Unauthorized();
 
@@ -82,19 +115,63 @@ namespace AirlineProjectWebAPI.Controllers
 
         [HttpDelete]
         [Route("api/customerfacade/cancelticket")]
-        public IHttpActionResult CancelTicket(Ticket ticket)
+        public IHttpActionResult CancelTicket(JObject data)
         {
+            JObject ticketToDelete = data["ttd"].Value<JObject>();
+            //long id = ticketToDelete["ID"].Value<long>();
+
+            Ticket ticket = new Ticket()
+            {
+                ID = ticketToDelete["ID"].Value<long>(),
+                CustomerId = ticketToDelete["CustomerId"].Value<long>(),
+                FlightId = ticketToDelete["FlightId"].Value<long>()
+            };
             ILoggedInCustomerFacade customerFacade;
             LoginToken<Customer> token;
             if (TryGetConnector(out customerFacade, out token) == true)
             {
-                customerFacade.CancelTicket(token, ticket);
-                return Ok();
+                try
+                {
+                    customerFacade.CancelTicket(token, ticket);
+                    return Ok();
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    return BadRequest(e.Message);
+                }
             }
             return Unauthorized();
 
             //LoginToken<Customer> token = (LoginToken<Customer>)GetLoginToken();
             //customerFacade.CancelTicket(token, ticket);
+            //return Ok();
+        }
+
+        [HttpPut]
+        [Route("api/customerfacade/modifycustomerdetails")]
+
+        public IHttpActionResult ModifyCustomerDetails([FromBody] Customer customer)
+        {
+            ILoggedInCustomerFacade customerFacade;
+            LoginToken<Customer> token;
+            if (TryGetConnector(out customerFacade, out token) == true)
+            {
+                try
+                {
+                    customerFacade.ModifyCustomerDetails(token, customer);
+                    return Ok();
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    return BadRequest(e.Message);
+                }
+            }
+            return Unauthorized();
+
+            //LoginToken<Customer> token = (LoginToken<Customer>)GetLoginToken();
+            //customerFacade.ModifyCustomerDetails(token, customer);
             //return Ok();
         }
     }

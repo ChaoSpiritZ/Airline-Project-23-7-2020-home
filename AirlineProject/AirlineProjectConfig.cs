@@ -20,7 +20,8 @@ namespace AirlineProject
         public const string TEST_ADMIN_USERNAME = "testadmin";
         public const string TEST_ADMIN_PASSWORD = "9999";
 
-
-        public const int SEND_TO_HISTORY_INTERVAL = 86400000; //recommended minimum - 10 miliseconds
+        //recommended minimum - 10 miliseconds
+        //public const int SEND_TO_HISTORY_INTERVAL = 86400000; //24 hours
+        public const int SEND_TO_HISTORY_INTERVAL = 60000; //1 minute
     }
 }

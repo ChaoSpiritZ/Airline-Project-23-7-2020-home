@@ -10,6 +10,8 @@ namespace AirlineProject
     {
         void CancelTicket(LoginToken<Customer> token, Ticket ticket);
         IList<Flight> GetAllMyFlights(LoginToken<Customer> token);
+        void ModifyCustomerDetails(LoginToken<Customer> token, Customer customer);
         Ticket PurchaseTicket(LoginToken<Customer> token, Flight flight);
+        IList<Ticket> GetAllMyTickets(LoginToken<Customer> token);
     }
 }

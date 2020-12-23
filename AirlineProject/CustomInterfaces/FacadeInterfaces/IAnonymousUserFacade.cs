@@ -22,6 +22,8 @@ namespace AirlineProject
         IList<FullFlightData> SearchFlights(string searchBy, string searchText, string searchFlights);
         IList<FullFlightData> SearchFlights2(string origin, string destination, string orderBy);
         IList<Country> GetAllCountries();
-        //IList<Customer> GetAllCustomers(); temporary
+        //IList<Customer> GetAllCustomers(); //temporary
+        Customer GetCustomerById(long id); //temporary?
+        Country GetCountryById(long id);
     }
 }

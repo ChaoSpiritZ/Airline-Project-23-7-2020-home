@@ -74,6 +74,10 @@ namespace AirlineProject
             return flights;
         }
 
+        /// <summary>
+        /// gets flights that depart at between now and 12 hours ahead
+        /// </summary>
+        /// <returns></returns>
         public IList<FullFlightData> GetDepartingFlightsFullData() //insert redis here - done
         {
             IRedisObject result = RedisAccessLayer.GetWithTimeStamp(RedisConfig.GetDepartingFlightsFullData);
@@ -96,6 +100,10 @@ namespace AirlineProject
             //return fullFlightsData;
         }
 
+        /// <summary>
+        /// gets all flights that land at between 4 hours ago to 12 hours ahead
+        /// </summary>
+        /// <returns></returns>
         public IList<FullFlightData> GetLandingFlightsFullData() //insert redis here -done
         {
             IRedisObject result = RedisAccessLayer.GetWithTimeStamp(RedisConfig.GetLandingFlightsFullData);
@@ -119,7 +127,7 @@ namespace AirlineProject
         }
 
         /// <summary>
-        /// search flights for razor page
+        /// search flights by parameters up to 12 days ahead (and from 4 hours ago if landing)
         /// </summary>
         /// <param name="searchBy"></param>
         /// <param name="searchText"></param>
@@ -127,6 +135,8 @@ namespace AirlineProject
         /// <returns></returns>
         public IList<FullFlightData> SearchFlights(string searchBy, string searchText, string searchFlights)
         {
+            //fix broken pages for the other scenarios
+
             IList<FullFlightData> fullFlightsData;
             string sqlQuery = "Select F.ID, AC.AIRLINE_NAME, C1.COUNTRY_NAME as ORIGIN_COUNTRY, C2.COUNTRY_NAME as DESTINATION_COUNTRY, F.DEPARTURE_TIME, F.LANDING_TIME, F.REMAINING_TICKETS from Flights as F " +
                 "inner join AirlineCompanies as AC on AC.ID = F.AIRLINECOMPANY_ID " +
@@ -142,16 +152,17 @@ namespace AirlineProject
 
                 if (searchFlights == "Departing")
                 {
-                    sqlQuery += "and F.DEPARTURE_TIME between DATEADD(hour,0, GETDATE()) and DATEADD(hour,12, GetDate())";
+                    sqlQuery += " and F.DEPARTURE_TIME between DATEADD(hour,0, GETDATE()) and DATEADD(day,12, GetDate())";
                 }
                 if (searchFlights == "Landing")
                 {
-                    sqlQuery += "and F.LANDING_TIME between DATEADD(hour,-4, GETDATE()) and DATEADD(hour,12, GetDate())";
+                    sqlQuery += " and F.LANDING_TIME between DATEADD(hour,-4, GETDATE()) and DATEADD(day,12, GetDate())";
                 }
                 if (searchFlights == "Both")
                 {
-                    sqlQuery += "and (F.DEPARTURE_TIME between DATEADD(hour,0, GETDATE()) and DATEADD(hour,12, GetDate()) " +
-                        "or F.LANDING_TIME between DATEADD(hour, -4, GETDATE()) and DATEADD(hour,12, GetDate()))";
+                    sqlQuery += " and (F.DEPARTURE_TIME between DATEADD(hour,0, GETDATE()) and DATEADD(day,12, GetDate()) " +
+                        "or F.LANDING_TIME between DATEADD(hour, -4, GETDATE()) and DATEADD(day,12, GetDate()))";
+                    //changed hours to days because that's WAAAY too small of a time frame
                 }
             }
             fullFlightsData = _flightDAO.SearchFlightsFullData(sqlQuery);
@@ -211,14 +222,14 @@ namespace AirlineProject
         }
 
         /// <summary>
-        /// temporary, supposed to be in admin facade with auth (actually exists there already)
+        /// temporary, supposed to be in admin facade with auth (actually exists there already) (?)
         /// </summary>
         /// <param name="customer"></param>
         public void RemoveCustomer(Customer customer)
         {
             POCOValidator.CustomerValidator(customer, true);
             if (_customerDAO.Get(customer.ID) == null)
-                throw new UserNotFoundException($"failed to remove customer! customer with username [{customer.UserName}] was not found!");
+                throw new UserNotFoundException($"Failed to remove customer! Customer with username [{customer.UserName}] was not found!");
             IList<Flight> flights = _flightDAO.GetFlightsByCustomer(customer);
             flights.ToList().ForEach(f => f.RemainingTickets++);
             flights.ToList().ForEach(f => _flightDAO.Update(f));
@@ -226,8 +237,14 @@ namespace AirlineProject
             _customerDAO.Remove(customer);
         }
 
+        public Country GetCountryById(long id)
+        {
+            Country country = _countryDAO.Get(id);
+            return country;
+        }
+
         /// <summary>
-        /// temporary, supposed to be in admin facade
+        /// temporary, supposed to be in admin facade (?)
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -238,14 +255,14 @@ namespace AirlineProject
         }
 
         /// <summary>
-        /// temporary, supposed to be in admin facade
+        /// temporary, supposed to be in admin facade (?)
         /// </summary>
         /// <param name="customer">updates the customer with this parameter's ID</param>
         public void UpdateCustomerDetails(Customer customer)
         {
             POCOValidator.CustomerValidator(customer, true);
             if (_customerDAO.Get(customer.ID) == null)
-                throw new UserNotFoundException($"failed to update customer! customer with username [{customer.UserName}] was not found!");
+                throw new UserNotFoundException($"Failed to update customer! Customer with username [{customer.UserName}] was not found!");
             _customerDAO.Update(customer);
         }
     }

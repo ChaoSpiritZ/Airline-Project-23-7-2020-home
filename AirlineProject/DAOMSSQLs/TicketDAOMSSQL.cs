@@ -32,7 +32,7 @@ namespace AirlineProject
                     cmd.Parameters.AddWithValue("@customerId", t.CustomerId);
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    t.ID = (long)(decimal)cmd.ExecuteScalar();
+                    t.ID = (long)(decimal)cmd.ExecuteScalar(); //adds the id to the returned ticket which is nice!
                 }
             }
         }

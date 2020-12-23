@@ -16,11 +16,22 @@ namespace AirlineProject
         {
             Task.Run(() =>
             {
+                RabbitMQService rabbit = new RabbitMQService(); //RabbitMQ
+                rabbit.Listen();
+            });
+
+            Task.Run(() =>
+            {
+                
+
                 SystemFacade _systemFacade = new SystemFacade();
                 while (true)
                 {
                     Thread.Sleep(AirlineProjectConfig.SEND_TO_HISTORY_INTERVAL);
-                    _systemFacade.MoveTicketsAndFlightsToHistory();
+                    _systemFacade.MoveTicketsAndFlightsToHistory(); //moves all flights/tickets to flights that landed 3+ hours ago
+                    //a bit of inconsistency with the 'landed x hours ago', here it deletes after 4 hours, 
+                    //and in another procedure it searches from 4 hours ago
+                    //not really a problem, just pointing it out, too much effort to make another stored procedure
                 }
             });
         }

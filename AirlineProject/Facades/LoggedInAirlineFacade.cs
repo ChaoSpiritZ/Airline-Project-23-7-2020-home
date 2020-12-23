@@ -24,12 +24,12 @@ namespace AirlineProject
             LoginHelper.CheckToken<AirlineCompany>(token);
             POCOValidator.FlightValidator(flight, true);
             if (_flightDAO.Get(flight.ID) == null)
-                throw new FlightNotFoundException($"failed to cancel flight! there is no flight with id [{flight.ID}]");
+                throw new FlightNotFoundException($"Failed to cancel flight! There is no flight with ID [{flight.ID}]");
             if (flight.AirlineCompanyId != token.User.ID)
-                throw new InaccessibleFlightException($"failed to cancel flight! you do not own flight [{flight}]");
-            if (_flightDAO.Get(flight.ID).DepartureTime < DateTime.Now) //was sql current date supposed to be involved?
-                throw new FlightAlreadyTookOffException($"failed to cancel flight! flight [{flight}] already took off at [{flight.DepartureTime}]");
-            _ticketDAO.RemoveTicketsByFlight(flight);
+                throw new InaccessibleFlightException($"Failed to cancel flight! You do not own flight [{flight}]");
+            if (_flightDAO.Get(flight.ID).DepartureTime < DateTime.Now) //was sql current date supposed to be involved? probably not?
+                throw new FlightAlreadyTookOffException($"Failed to cancel flight! Flight [{flight}] already took off at [{flight.DepartureTime}]");
+            _ticketDAO.RemoveTicketsByFlight(flight); //doesn't notify the customers but it'll be too much decoration for this project
             _flightDAO.Remove(flight);
 
             // to delete a poco ==> i need to delete those
@@ -50,10 +50,10 @@ namespace AirlineProject
         public void ChangeMyPassword(LoginToken<AirlineCompany> token, string oldPassword, string newPassword)
         {
             LoginHelper.CheckToken<AirlineCompany>(token);
-            if (newPassword.Trim() == "")
-                throw new EmptyPasswordException($"failed to change password! new password is empty!");
+            if (newPassword.Trim() == "" || newPassword == "{}")
+                throw new EmptyPasswordException($"Failed to change password! The new password is empty!");
             if (token.User.Password != oldPassword)
-                throw new WrongPasswordException($"failed to change password! old password doesn't match!");
+                throw new WrongPasswordException($"Failed to change password! Old password doesn't match!");
             token.User.Password = newPassword;
             _airlineDAO.Update(token.User);
         }
@@ -69,14 +69,17 @@ namespace AirlineProject
             POCOValidator.FlightValidator(flight, false);
             //if (flight.AirlineCompanyId != token.User.ID)
             //    throw new InaccessibleFlightException($"failed to create flight [{flight}], you do not own this flight!"); //probably won't happen unless something goes wrong
+            if (_airlineDAO.Get(flight.AirlineCompanyId) == null)
+                throw new AirlineNotFoundException($"Failed to create flight [{flight}]! Airline [{flight.AirlineCompanyId}] was not found!");
             if (DateTime.Compare(flight.DepartureTime, flight.LandingTime) > 0)
-                throw new InvalidFlightDateException($"failed to create flight [{flight}], cannot fly back in time from [{flight.DepartureTime}] to [{flight.LandingTime}]");
+                throw new InvalidFlightDateException($"Failed to create flight [{flight}]! Cannot fly back in time from [{flight.DepartureTime}] to [{flight.LandingTime}]");
             if (DateTime.Compare(flight.DepartureTime, flight.LandingTime) == 0)
-                throw new InvalidFlightDateException($"failed to create flight [{flight}], departure time and landing time are the same [{flight.DepartureTime}], and as you know, teleportation isn't invented yet");
+                throw new InvalidFlightDateException($"Failed to create flight [{flight}]! Departure time and landing time are the same [{flight.DepartureTime}], and as you know, teleportation isn't invented yet");
             if (_countryDAO.Get(flight.OriginCountryCode) == null)
-                throw new CountryNotFoundException($"failed to create flight [{flight}], origin country with id [{flight.OriginCountryCode}] was not found!");
+                throw new CountryNotFoundException($"Failed to create flight [{flight}]! Origin country with id [{flight.OriginCountryCode}] was not found!");
             if (_countryDAO.Get(flight.DestinationCountryCode) == null)
-                throw new CountryNotFoundException($"failed to create flight [{flight}], destination country with id [{flight.DestinationCountryCode}] was not found!");
+                throw new CountryNotFoundException($"Failed to create flight [{flight}]! Destination country with id [{flight.DestinationCountryCode}] was not found!");
+            //yes, there can technically be flights with 0 seats available, can easily change it in the POCOValidator but i prefer it to be an option
             flight.AirlineCompanyId = token.User.ID;
             _flightDAO.Add(flight);
         }
@@ -112,13 +115,15 @@ namespace AirlineProject
             LoginHelper.CheckToken<AirlineCompany>(token);
             POCOValidator.AirlineCompanyValidator(airline, true);
             if (airline.ID != token.User.ID)
-                throw new InaccessibleAirlineCompanyException($"failed to modify details! this is not your account!"); //will it ever happen? who knows...
+                throw new InaccessibleAirlineCompanyException($"Failed to modify details! This is not your account!"); //will it ever happen? who knows...
             if (_airlineDAO.GetAirlineByAirlineName(airline.AirlineName) != null)
                 if (_airlineDAO.GetAirlineByAirlineName(airline.AirlineName) != token.User)
-                    throw new AirlineNameAlreadyExistsException($"failed to modify details! there is already and airline with the name [{airline.AirlineName}]");
+                    throw new AirlineNameAlreadyExistsException($"Failed to modify details! There is already an airline with the name [{airline.AirlineName}]");
             if (_airlineDAO.GetAirlineByUsername(airline.UserName) != null)
                 if (_airlineDAO.GetAirlineByUsername(airline.UserName) != token.User)
-                    throw new UsernameAlreadyExistsException($"failed to modify details! username [{airline.UserName}] is already taken!");
+                    throw new UsernameAlreadyExistsException($"Failed to modify details! Username [{airline.UserName}] is already taken!");
+            if (_countryDAO.Get(airline.CountryCode) == null)
+                throw new CountryNotFoundException($"Failed to update airline! There is no country with id [{airline.CountryCode}]");
             airline.Password = _airlineDAO.Get(airline.ID).Password; // i guess..
             _airlineDAO.Update(airline);
         }
@@ -132,18 +137,23 @@ namespace AirlineProject
         {
             LoginHelper.CheckToken<AirlineCompany>(token);
             POCOValidator.FlightValidator(flight, true);
-            if (_flightDAO.Get(flight.ID) == null)
-                throw new FlightNotFoundException($"failed to update flight! flight with id of [{flight.ID}] was not found!");
+            Flight flightBeforeChange = _flightDAO.Get(flight.ID);
+            if (flightBeforeChange == null)
+                throw new FlightNotFoundException($"Failed to update flight! Flight with id of [{flight.ID}] was not found!");
             if (flight.AirlineCompanyId != token.User.ID)
-                throw new InaccessibleFlightException($"failed to update flight! you do not own flight [{flight}]");
+                throw new InaccessibleFlightException($"Failed to update flight! You do not own flight [{flight}]");
             if (DateTime.Compare(flight.DepartureTime, flight.LandingTime) > 0)
-                throw new InvalidFlightDateException($"failed to update flight [{flight}], cannot fly back in time from [{flight.DepartureTime}] to [{flight.LandingTime}]");
+                throw new InvalidFlightDateException($"Failed to update flight [{flight}]! Cannot fly back in time from [{flight.DepartureTime}] to [{flight.LandingTime}]");
             if (DateTime.Compare(flight.DepartureTime, flight.LandingTime) == 0)
-                throw new InvalidFlightDateException($"failed to update flight [{flight}], departure time and landing time are the same [{flight.DepartureTime}], and as you know, teleportation isn't invented yet");
+                throw new InvalidFlightDateException($"Failed to update flight [{flight}]! Departure time and landing time are the same [{flight.DepartureTime}], and as you know, teleportation isn't invented yet");
             if (_countryDAO.Get(flight.OriginCountryCode) == null)
-                throw new CountryNotFoundException($"failed to update flight [{flight}], origin country with id [{flight.OriginCountryCode}] was not found!");
+                throw new CountryNotFoundException($"Failed to update flight [{flight}]! Origin country with id [{flight.OriginCountryCode}] was not found!");
             if (_countryDAO.Get(flight.DestinationCountryCode) == null)
-                throw new CountryNotFoundException($"failed to update flight [{flight}], destination country with id [{flight.DestinationCountryCode}] was not found!");
+                throw new CountryNotFoundException($"Failed to update flight [{flight}]! Destination country with id [{flight.DestinationCountryCode}] was not found!");
+            //decided to not add this because flights might get updated because of delayed departure time
+            //if(flightBeforeChange.DepartureTime < DateTime.Now)
+            //    if(flightBeforeChange.OriginCountryCode != flight.OriginCountryCode || flightBeforeChange.DepartureTime != flight.DepartureTime || flightBeforeChange.RemainingTickets != flight.RemainingTickets)
+            //        throw new FlightAlreadyTookOffException($"failed to update flight [{flight}], can only update destination country and landing time after the flight took off!");
             _flightDAO.Update(flight);
         }
     }

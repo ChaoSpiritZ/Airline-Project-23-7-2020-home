@@ -5,7 +5,10 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Cors;
+using EasyNetQ;
 using AirlineProject;
+using Newtonsoft.Json;
+using System.Threading;
 
 namespace AirlineProjectWebAPI.Controllers
 {
@@ -104,7 +107,7 @@ namespace AirlineProjectWebAPI.Controllers
 
         [HttpGet]
         [Route("api/anonymousfacade/getairlinecompanybyid/{id}")]
-        public IHttpActionResult GetAirlineCompanyById(long id) //CONTINUE THE LOG
+        public IHttpActionResult GetAirlineCompanyById(long id) //ADDED THE LOG
         {
             log.Info($"entering GetAirlineCompanyById (id = {id})");
 
@@ -129,16 +132,24 @@ namespace AirlineProjectWebAPI.Controllers
         [Route("api/anonymousfacade/getflight")] //query parameter
         public IHttpActionResult GetFlight(long id)
         {
-            Flight result = ((AnonymousUserFacade)Request.Properties["facade"]).GetFlight(id);
-
-            //Flight clonedResult = CopyMachine.DeepCopy(result);
-
-            if (result is null)
+            try
             {
-                return StatusCode(HttpStatusCode.NoContent);
-            }
+                Flight result = ((AnonymousUserFacade)Request.Properties["facade"]).GetFlight(id);
 
-            return Ok(result);
+                //Flight clonedResult = CopyMachine.DeepCopy(result);
+
+                if (result is null)
+                {
+                    return StatusCode(HttpStatusCode.NoContent);
+                }
+
+                return Ok(result);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpGet]
@@ -209,14 +220,54 @@ namespace AirlineProjectWebAPI.Controllers
             return Ok(result);
         }
 
+        //[HttpGet]
+        //[Route("api/anonymousfacade/getcustomerbyid/{customerId}")]
+        //public IHttpActionResult GetCustomerById(long customerId)
+        //{
+        //    //get customer by id
+        //    Customer result = ((AnonymousUserFacade)Request.Properties["facade"]).GetCustomerById(customerId);
+
+        //    return Ok(result);
+        //}
+
         [HttpPut]
         [Route("api/anonymousfacade/updatecustomer")]
-        public IHttpActionResult UpdateCustomer([FromBody] Customer customer)
+        public IHttpActionResult UpdateCustomer([FromBody] Customer customer) //doing RabbitMQ here with easynetq
         {
-            ((AnonymousUserFacade)Request.Properties["facade"]).UpdateCustomerDetails(customer);
-            return Ok();
+            //((AnonymousUserFacade)Request.Properties["facade"]).UpdateCustomerDetails(customer); //before rabbit
+
+            MessageCarrier<Customer> carrier = new MessageCarrier<Customer>(customer, MessageCarrier<Customer>.ControllerRequest.UpdateCustomer);
+            //string message = JsonConvert.SerializeObject(carrier);
+
+            using (var bus = RabbitHutch.CreateBus("host=localhost"))
+            {
+                bus.Publish<MessageCarrier<Customer>>(carrier, "from_anon_controller");
+            }
+
+            ResponseCarrier result = null;
+
+            ManualResetEvent mre = new ManualResetEvent(false);
+
+            using (var bus = RabbitHutch.CreateBus("host=localhost"))
+            {
+                bus.Subscribe<ResponseCarrier>("to_anon_controller", (ResponseCarrier messageResult) => { result = messageResult; mre.Set(); }); //what is supposed to be in a task? async await somewhere?
+                mre.WaitOne();
+            }
+
+
+            if(result.Response == ResponseCarrier.ServiceResponse.Ok)
+            {
+                return Ok();
+            }
+            else
+            {
+                return InternalServerError();
+            }
+            
+            
         }
 
+        //did i even use this? i hope not...
         [HttpDelete]
         [Route("api/anonymousfacade/deletecustomer/{customerId}")]
         public IHttpActionResult DeleteCustomer(long customerId)
@@ -227,5 +278,7 @@ namespace AirlineProjectWebAPI.Controllers
              
             return Ok();
         }
+
+        
     }
 }

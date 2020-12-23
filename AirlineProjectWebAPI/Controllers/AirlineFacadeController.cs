@@ -1,14 +1,17 @@
 ﻿using AirlineProject;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace AirlineProjectWebAPI.Controllers
 {
     [AirlineAuthentication]
+    [EnableCors("*", "*", "*")]
     public class AirlineFacadeController : ApiController
     {
         private FlyingCenterSystem fcs = FlyingCenterSystem.GetInstance();
@@ -54,6 +57,7 @@ namespace AirlineProjectWebAPI.Controllers
         [Route("api/airlinefacade/getallflights")]
         public IHttpActionResult GetAllFlights()
         {
+            //gets all the flights of the chosen airline company (using the token)
             ILoggedInAirlineFacade airlineFacade;
             LoginToken<AirlineCompany> token;
             if (TryGetConnector(out airlineFacade, out token) == true)
@@ -70,14 +74,35 @@ namespace AirlineProjectWebAPI.Controllers
 
         [HttpDelete]
         [Route("api/airlinefacade/cancelflight")]
-        public IHttpActionResult CancelFlight([FromBody] Flight flight)
+        public IHttpActionResult CancelFlight(JObject data)
         {
+            JObject flightToCancel = data["ftc"].Value<JObject>();
+
+            Flight flight = new Flight()
+            {
+                ID = flightToCancel["ID"].Value<long>(),
+                AirlineCompanyId = flightToCancel["AirlineCompanyId"].Value<long>(),
+                OriginCountryCode = flightToCancel["OriginCountryCode"].Value<long>(),
+                DestinationCountryCode = flightToCancel["DestinationCountryCode"].Value<long>(),
+                DepartureTime = flightToCancel["DepartureTime"].Value<DateTime>(),
+                LandingTime = flightToCancel["LandingTime"].Value<DateTime>(),
+                RemainingTickets = flightToCancel["RemainingTickets"].Value<int>()
+            };
+
             ILoggedInAirlineFacade airlineFacade;
             LoginToken<AirlineCompany> token;
             if (TryGetConnector(out airlineFacade, out token) == true)
             {
-                airlineFacade.CancelFlight(token, flight);
-                return Ok();
+                try
+                {
+                    airlineFacade.CancelFlight(token, flight);
+                    return Ok();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    return BadRequest(e.Message);
+                }
             }
             return Unauthorized();
 
@@ -94,8 +119,16 @@ namespace AirlineProjectWebAPI.Controllers
             LoginToken<AirlineCompany> token;
             if (TryGetConnector(out airlineFacade, out token) == true)
             {
-                airlineFacade.CreateFlight(token, flight);
-                return Ok();
+                try
+                {
+                    airlineFacade.CreateFlight(token, flight);
+                    return Ok();
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    return BadRequest(e.Message);
+                }
             }
             return Unauthorized();
 
@@ -112,8 +145,16 @@ namespace AirlineProjectWebAPI.Controllers
             LoginToken<AirlineCompany> token;
             if (TryGetConnector(out airlineFacade, out token) == true)
             {
-                airlineFacade.UpdateFlight(token, flight);
-                return Ok();
+                try
+                {
+                    airlineFacade.UpdateFlight(token, flight);
+                    return Ok();
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    return BadRequest(e.Message);
+                }
             }
             return Unauthorized();
 
@@ -124,14 +165,25 @@ namespace AirlineProjectWebAPI.Controllers
 
         [HttpPut]
         [Route("api/airlinefacade/changemypassword")]
-        public IHttpActionResult ChangeMyPassword(string oldPassword, string newPassword) //path parameter
+        public IHttpActionResult ChangeMyPassword([FromBody] List<object> passwordPair) //path parameter (wait... but it's passwords....)
         {
+            string oldPassword = passwordPair[0].ToString();
+            string newPassword = passwordPair[1].ToString();
+
             ILoggedInAirlineFacade airlineFacade;
             LoginToken<AirlineCompany> token;
             if (TryGetConnector(out airlineFacade, out token) == true)
             {
-                airlineFacade.ChangeMyPassword(token, oldPassword, newPassword);
-                return Ok();
+                try
+                {
+                    airlineFacade.ChangeMyPassword(token, oldPassword, newPassword);
+                    return Ok();
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    return BadRequest(e.Message);
+                }
             }
             return Unauthorized();
 
@@ -142,14 +194,22 @@ namespace AirlineProjectWebAPI.Controllers
 
         [HttpPut]
         [Route("api/airlinefacade/modifyairlinedetails")]
-        public IHttpActionResult MofidyAirlineDetails([FromBody] AirlineCompany airline)
+        public IHttpActionResult ModifyAirlineDetails([FromBody] AirlineCompany airline)
         {
             ILoggedInAirlineFacade airlineFacade;
             LoginToken<AirlineCompany> token;
             if (TryGetConnector(out airlineFacade, out token) == true)
             {
-                airlineFacade.ModifyAirlineDetails(token, airline);
-                return Ok();
+                try
+                {
+                    airlineFacade.ModifyAirlineDetails(token, airline);
+                    return Ok();
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    return BadRequest(e.Message);
+                }
             }
             return Unauthorized();
 

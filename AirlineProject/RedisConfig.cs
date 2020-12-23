@@ -8,7 +8,7 @@ namespace AirlineProject
 {
     static class RedisConfig
     {
-        public const int UpdateInterval = 10;
+        public const int UpdateInterval = 1; //by minutes i think
         public const string GetDepartingFlightsFullData = "GetDepartingFlightsFullData";
         public const string GetLandingFlightsFullData = "GetLandingFlightsFullData";
     }

@@ -59,7 +59,7 @@ namespace AirlineProjectTest
         {
             ILoggedInAdministratorFacade adminFacade = (ILoggedInAdministratorFacade)TestConfig.fcs.Login(AirlineProjectConfig.TEST_ADMIN_USERNAME, AirlineProjectConfig.TEST_ADMIN_PASSWORD, out ILoginToken adminToken);
             adminFacade.CreateNewAirline((LoginToken<Administrator>)adminToken, TestData.airline1);
-            adminFacade.RemoveAirline((LoginToken<Administrator>)adminToken, TestData.airline1);
+            adminFacade.RemoveAirline((LoginToken<Administrator>)adminToken, TestData.airline1.ID);
 
             IAnonymousUserFacade anonymousFacade = (IAnonymousUserFacade)TestConfig.fcs.Login("testAnonymous", "99999", out ILoginToken anonymousToken);
 
@@ -71,7 +71,7 @@ namespace AirlineProjectTest
         {
             ILoggedInAdministratorFacade adminFacade = (ILoggedInAdministratorFacade)TestConfig.fcs.Login(AirlineProjectConfig.TEST_ADMIN_USERNAME, AirlineProjectConfig.TEST_ADMIN_PASSWORD, out ILoginToken adminToken);
             adminFacade.CreateNewCustomer((LoginToken<Administrator>)adminToken, TestData.customer1);
-            adminFacade.RemoveCustomer((LoginToken<Administrator>)adminToken, TestData.customer1);
+            adminFacade.RemoveCustomer((LoginToken<Administrator>)adminToken, TestData.customer1.ID);
 
             Assert.AreEqual(null, TestConfig.testFacade.GetCustomerById(TestData.customer1.ID));
         }
@@ -160,7 +160,7 @@ namespace AirlineProjectTest
         public void AdminFacadeRemoveAirlineMethodUserNotFoundException()
         {
             ILoggedInAdministratorFacade adminFacade = (ILoggedInAdministratorFacade)TestConfig.fcs.Login(AirlineProjectConfig.TEST_ADMIN_USERNAME, AirlineProjectConfig.TEST_ADMIN_PASSWORD, out ILoginToken adminToken);
-            adminFacade.RemoveAirline((LoginToken<Administrator>)adminToken, TestData.airline1);
+            adminFacade.RemoveAirline((LoginToken<Administrator>)adminToken, TestData.airline1.ID);
         }
 
         [TestMethod]
@@ -168,7 +168,7 @@ namespace AirlineProjectTest
         public void AdminFacadeRemoveCustomerMethodUserNotFoundException()
         {
             ILoggedInAdministratorFacade adminFacade = (ILoggedInAdministratorFacade)TestConfig.fcs.Login(AirlineProjectConfig.TEST_ADMIN_USERNAME, AirlineProjectConfig.TEST_ADMIN_PASSWORD, out ILoginToken adminToken);
-            adminFacade.RemoveCustomer((LoginToken<Administrator>)adminToken, TestData.customer1);
+            adminFacade.RemoveCustomer((LoginToken<Administrator>)adminToken, TestData.customer1.ID);
         }
 
         [TestMethod]

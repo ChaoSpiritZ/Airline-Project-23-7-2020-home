@@ -31,7 +31,19 @@ namespace AirlineProjectWebAPI.Controllers
             string username = usernamePasswordArray[0];
             string password = usernamePasswordArray[1];
 
-            FacadeBase facade = fcs.Login(username, password, out ILoginToken token);
+            FacadeBase facade = null;
+            ILoginToken token = null;
+            try
+            {
+                //FacadeBase facade = fcs.Login(username, password, out ILoginToken token);
+                facade = fcs.Login(username, password, out token);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                actionContext.Response = actionContext.Request.CreateResponse(HttpStatusCode.Unauthorized, e.Message);
+                return;
+            }
 
             if (facade != null)
             {

@@ -10,6 +10,9 @@ namespace AirlineProject
     {
         public static void AirlineCompanyValidator(AirlineCompany airline , bool checkId)
         {
+            if (airline == null)
+                throw new InvalidPOCOException("No airline was submitted!");
+
             if (checkId)
             {
                 if (airline.ID <= 0)
@@ -17,7 +20,7 @@ namespace AirlineProject
             }
 
             if (airline.AirlineName.Trim() == "")
-                throw new InvalidPOCOException($"empty airline name [{airline.ID}] for airline [{airline}]");
+                throw new InvalidPOCOException($"empty airline name [{airline.AirlineName}] for airline [{airline}]");
 
             if (airline.CountryCode <= 0)
                 throw new InvalidPOCOException($"illegal country code [{airline.CountryCode}] for airline [{airline}]");
@@ -31,6 +34,9 @@ namespace AirlineProject
 
         public static void CountryValidator(Country country, bool checkId)
         {
+            if (country == null)
+                throw new InvalidPOCOException("No country was submitted!");
+
             if (checkId)
             {
                 if (country.ID <= 0)
@@ -43,6 +49,9 @@ namespace AirlineProject
 
         public static void CustomerValidator(Customer customer, bool checkId)
         {
+            if (customer == null)
+                throw new InvalidPOCOException("No customer was submitted!");
+
             if (checkId)
             {
                 if (customer.ID <= 0)
@@ -73,6 +82,9 @@ namespace AirlineProject
 
         public static void FlightValidator(Flight flight, bool checkId)
         {
+            if (flight == null)
+                throw new InvalidPOCOException("No flight was submitted!");
+
             if (checkId)
             {
                 if (flight.ID <= 0)
@@ -100,6 +112,9 @@ namespace AirlineProject
 
         public static void TicketValidator(Ticket ticket, bool checkId)
         {
+            if (ticket == null)
+                throw new InvalidPOCOException("No ticket was submitted!");
+
             if (checkId)
             {
                 if (ticket.ID <= 0)
